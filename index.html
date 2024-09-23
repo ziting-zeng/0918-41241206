@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布遊戲</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+        .image-button {
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+        img {
+            width: 100px; /* 調整圖片大小 */
+        }
+        #scoreboard {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>剪刀石頭布遊戲</h1>
+    <div class="button-container">
+        <img class="image-button" src="https://today-obs.line-scdn.net/0hBYBMOojyHXZ_NA0SzSdiIUdiEQdMUgd_XVUGFw08Q0dbGFMnE1BOFVwzRloCBAomXwZUFlMzRkZXBw8jFg/w644" alt="石頭" id="rock">
+        <img class="image-button" src="https://class.vbird.tw/~4070c018/web2/images/paper.png" alt="布" id="paper">
+        <img class="image-button" src="https://pic.pngsucai.com/00/91/50/a93782c72dd04e84.webp" alt="剪刀" id="scissors">
+    </div>
+    <div id="scoreboard"></div>
+
+    <!-- 音效 -->
+    <audio id="win-sound" src="勝利音效 YouTuber常用素材 無版權 綜藝篇 【音效素材庫】.mp3"></audio>
+    <audio id="lose-sound" src="哇哇哇…(失敗) 音效.mp3"></audio>
+    <audio id="tie-sound" src="sound effect音效拍手👏.mp3"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        let playerWins = 0;
+        let computerWins = 0;
+
+        document.getElementById('rock').addEventListener('click', () => play('rock'));
+        document.getElementById('paper').addEventListener('click', () => play('paper'));
+        document.getElementById('scissors').addEventListener('click', () => play('scissors'));
+
+        function play(playerChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+            let resultMessage = '';
+
+            const winSound = document.getElementById('win-sound');
+            const loseSound = document.getElementById('lose-sound');
+            const tieSound = document.getElementById('tie-sound');
+
+            if (playerChoice === computerChoice) {
+                resultMessage = `平手！你和電腦都出了 ${getChoiceName(playerChoice)}`;
+                tieSound.play(); // 播放平手音效
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                playerWins++;
+                resultMessage = `你贏了！你出了 ${getChoiceName(playerChoice)}，電腦出了 ${getChoiceName(computerChoice)}`;
+                winSound.play(); // 播放贏的音效
+            } else {
+                computerWins++;
+                resultMessage = `你輸了！你出了 ${getChoiceName(playerChoice)}，電腦出了 ${getChoiceName(computerChoice)}`;
+                loseSound.play(); // 播放輸的音效
+            }
+
+            // 更新記分板
+            updateScoreboard();
+
+            // 檢查勝利者
+            checkWinner(resultMessage);
+        }
+
+        function checkWinner(resultMessage) {
+            if (playerWins === 3 || computerWins === 3) {
+                const winner = playerWins === 3 ? '你' : '電腦';
+                Swal.fire({
+                    title: '遊戲結束!',
+                    text: `${winner} 獲勝！最終比分：你 ${playerWins} - ${computerWins} 電腦`,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '重新開始',
+                    cancelButtonText: '中斷遊戲'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        resetGame();
+                    } else {
+                        Swal.fire('遊戲結束', '謝謝你玩遊戲！', 'success');
+                    }
+                });
+            } else {
+                // 使用 SweetAlert2 顯示結果
+                Swal.fire({
+                    title: '遊戲結果',
+                    text: resultMessage,
+                    icon: playerWins > computerWins ? 'success' : (playerWins < computerWins ? 'error' : 'info'),
+                    confirmButtonText: '確定'
+                });
+            }
+        }
+
+        function updateScoreboard() {
+            document.getElementById('scoreboard').textContent = `你：${playerWins} - ${computerWins}：電腦`;
+        }
+
+        function resetGame() {
+            playerWins = 0;
+            computerWins = 0;
+            updateScoreboard();
+        }
+
+        function getChoiceName(choice) {
+            switch (choice) {
+                case 'rock': return '石頭';
+                case 'paper': return '布';
+                case 'scissors': return '剪刀';
+            }
+        }
+    </script>
+</body>
+</html>
